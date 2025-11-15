@@ -21,3 +21,6 @@ Deploy natural, human-sounding audio with ElevenLabs. Create realistic, dynamic,
 
 [Intuit] Most Transformative Hack Leveraging Generative AI/ML:
 A submission that uses Artificial Intelligence, Machine Learning, or Generative AI to solve a complex problem by providing intelligent guidance, automating a tedious workflow, or dramatically increasing efficiency and speed for the user. The best hacks will demonstrate clear, measurable impact.
+
+[Technica] No Mortals Left Behind: Best Accessibility Solution:
+Technica embraces its mission to promote diversity and inclusion! We want to see your hacks that utilize technology to provide more inclusive, accessible, and empowering solutions.
