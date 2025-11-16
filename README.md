@@ -1,26 +1,117 @@
-# MLHTechnicia
+# ROMA-VLM: Multimodal Vision Extension for ROMA
 
-Technica's Mission  - How does the project support an inclusive tech community? Does it consider accessibility, representation, user safety, empowerment, or other design choices that reflect Technica’s mission to support underrepresented genders? 
-
-UI/UX Design (visually appealing and user-friendly)
-
-Functionality & Execution (work as intended)
-
-Originality & Creativity (creative idea or its execution)
-
-Adherence to Category (align with the category)
+This project extends the ROMA (Recursive Open Meta-Agents) framework with Vision Language Model (VLM) capabilities, allowing each node (Atomizer, Planner, Executor, Aggregator, Verifier) to process both text and images.
 
 
-[Technica] The First Light: Best Startup Track Hack:
-The Techni-fam loves innovation! Whether it's a disruptive tech solution, a creative app, or a groundbreaking product, we're looking for hacks that have the potential to revolutionize the startup world. Show us your entrepreneurial spirit and take your project to the next level.
 
 
-[MLH] Best Use of ElevenLabs:
-Deploy natural, human-sounding audio with ElevenLabs. Create realistic, dynamic, and emotionally expressive voices for any project, from interactive AI companions to narrated stories and voice-enabled apps. ElevenLabs will empower you to build rich, immersive experiences without the need for actors or complex audio production, using simply the power of AI. Integrate fully autonomous audio experiences into your hack with ElevenLabs and give your project a voice, along with giving your team the chance to win exclusive ElevenLabs branded airpods!
+# 🎯 Features
+
+- **VLM-Powered Nodes**: Every ROMA node can accept images as inputs
+- **Different VLMs per Node**: Configure different vision models for each agent
+- **Recursive Image Processing**: Images flow through the task hierarchy
+- **Zero ROMA Modifications**: Uses ROMA as a library, no core changes needed
+- **Drop-in Replacement**: Compatible with existing ROMA workflows
 
 
-[Intuit] Most Transformative Hack Leveraging Generative AI/ML:
-A submission that uses Artificial Intelligence, Machine Learning, or Generative AI to solve a complex problem by providing intelligent guidance, automating a tedious workflow, or dramatically increasing efficiency and speed for the user. The best hacks will demonstrate clear, measurable impact.
 
-[Technica] No Mortals Left Behind: Best Accessibility Solution:
-Technica embraces its mission to promote diversity and inclusion! We want to see your hacks that utilize technology to provide more inclusive, accessible, and empowering solutions.
+
+# 🚀 Installation
+
+```bash
+# Create venv
+python3 -m venv vlm-roma-env
+source vlm-roma-env/bin/activate  # This is for macOS/Linux but for windows use roma-vlm\Scripts\activate 
+pip install -r requirements.txt # install all the dependences
+
+# now we need to install ROMA into this environment and hence use following
+cd ..
+git clone https://github.com/sentient-agi/ROMA.git
+cd ../ROMA
+pip install -e .
+cd ../MLHTechnicia
+pip install -e . # downloading roma-vlm into our env so that we can import it anywhere easily
+```
+
+
+
+
+
+# 📦 Project Structure
+
+```
+roma-vlm-extension/
+├── roma_vlm/
+│   ├── signatures/          # Multimodal signatures extending ROMA
+│   ├── modules/             # VLM-enabled modules (Atomizer, Planner, etc.)
+│   ├── engine/              # Multimodal solve() function
+│   ├── config/              # VLM-specific configuration
+│   └── utils/               # Image handling utilities
+├── examples/                # Usage examples
+├── tests/                   # Test suite
+├── config/                  # YAML configuration profiles
+└── pyproject.toml
+```
+
+
+
+
+
+
+
+
+
+
+
+# 🔄 Data Flow
+
+## 1. Single Image Analysis (Atomic Task)
+
+```
+User Input: goal + image
+         ↓
+MultimodalAtomizer(goal, [image])
+  ├─ VLM analyzes: "Can I handle this directly?"
+  └─ Result: is_atomic = True
+         ↓
+MultimodalExecutor(goal, [image])
+  ├─ VLM analyzes image
+  └─ Result: analysis output
+         ↓
+MultimodalVerifier(goal, [image], output)
+  ├─ VLM checks: "Does output match image?"
+  └─ Result: verdict = True
+         ↓
+Final Result
+```
+
+## 2. Multi-Image Task with Planning
+
+```
+User Input: goal + images
+         ↓
+MultimodalAtomizer(goal, [img1, img2, img3])
+  ├─ VLM: "This needs decomposition"
+  └─ Result: is_atomic = False
+         ↓
+MultimodalPlanner(goal, [img1, img2, img3])
+  ├─ VLM analyzes images
+  ├─ Creates subtasks referencing specific images
+  └─ Result: [subtask1, subtask2, subtask3]
+         ↓
+    ┌────┴────┬────────┐
+    ▼         ▼        ▼
+Executor   Executor  Executor
+(img1)     (img2)    (img3)
+    │         │        │
+    └────┬────┴────────┘
+         ↓
+MultimodalAggregator(goal, [img1,img2,img3], results)
+  ├─ VLM synthesizes with image context
+  └─ Result: synthesized output
+         ↓
+MultimodalVerifier(goal, [img1,img2,img3], output)
+  └─ Result: verdict
+         ↓
+Final Result
+```
