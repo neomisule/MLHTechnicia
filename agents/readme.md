@@ -1,9 +1,0 @@
-- Self Care Agent
-- Capital One Text Only Deep Research Financial Agent : Add Capital 1 data to vector store using their API + Access to graphing tool so that it can do plots
-- Video Agent : since we can pass multiple images to our framework we can give it a video as image frames and ask questions on that video
-- `Medical agent :` query could be like attach an image and ask the agent to go figure out what problem is the agent facing
-    - Medical image analysis (educational)
-    - Cell counting
-    - Chart/graph extraction
-    - Microscopy analysis
-- `Travel Agent :` Like connect all mcps to it. Example can be end to end travel planning + flight booking + hotels. Give an image of a place and let the model figure out where it is and plan a trip for that

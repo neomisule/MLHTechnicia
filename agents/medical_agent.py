@@ -1,3 +1,12 @@
+# query could be like attach an image and ask the agent to go figure out what problem is the agent facing
+    # - Medical image analysis (educational)
+    # - Cell counting
+    # - Chart/graph extraction
+    # - Microscopy analysis
+
+
+
+
 # ROMA-VLM Configuration Profile: Medical Vision Agent
 # Optimized for medical imaging analysis with conservative settings
 

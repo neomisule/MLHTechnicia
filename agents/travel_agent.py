@@ -1,0 +1,1 @@
+# Like connect all mcps to it. Example can be end to end travel planning + flight booking + hotels. Give an image of a place and let the model figure out where it is and plan a trip for that
