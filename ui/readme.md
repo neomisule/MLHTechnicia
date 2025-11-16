@@ -1,5 +1,0 @@
-- high contrast theme
-- dsylexia friendly fonts 
-- voice chatbot activated on special keyword like Alexa (bonus : identify accent and answer in same accent)
-- Access to already built agents
-- Normal access to multi-modal roma with flexibility to choose any model which the user wants and agentic integration

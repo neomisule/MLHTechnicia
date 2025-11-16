@@ -49,6 +49,15 @@ roma-vlm-extension/
 └── pyproject.toml
 ```
 
+# UI
+```bash
+streamlit run ui/app.py
+```
+The application will open in your default web browser at `http://localhost:8501`
+
+
+
+
 # 🔄 Data Flow
 
 ## 1. Single Image Analysis (Atomic Task)

@@ -38,36 +38,7 @@ from config import (
     MEMORY_CONFIG,
 )
 
-# Get image path from command line argument
-image_path = sys.argv[1]
-
-# Use the default goal from config (can be overridden)
-goal = DEFAULT_GOAL
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-async def test_image_analysis():
+async def runner(goal, image_path):
     # Initialize tools with configurations
     calculator = CalculatorToolkit(**TOOL_CONFIGS["calculator"])
     binance = BinanceToolkit(**TOOL_CONFIGS["binance"])
@@ -142,5 +113,5 @@ async def test_image_analysis():
     return result
 
 if __name__ == "__main__":
-    result = asyncio.run(test_image_analysis())
+    result = asyncio.run(runner(DEFAULT_GOAL, sys.argv[1]))
     print(result)
