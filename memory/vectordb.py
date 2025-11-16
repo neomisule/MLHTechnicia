@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 from typing import Optional, Callable
 from uuid import uuid4
@@ -11,11 +12,10 @@ import asyncio
 import numpy as np
 import pandas as pd
 import ast
-
 from generate_embeddings import generate_embeddings
 
-client = AsyncQdrantClient(url="http://localhost:6333")
-COLLECTION_NAME = "memories"
+COLLECTION_NAME = str(os.getenv("COLLECTION_NAME"))
+client = AsyncQdrantClient(url=str(os.getenv("QDRANT_URL")))
 
 
 class EmbeddedMemory(BaseModel):

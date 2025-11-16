@@ -23,12 +23,12 @@ from memory.update_memory import update_memories
 
 
 image_path = sys.argv[1]
-model = os.getenv("MODEL", "anthropic/claude-sonnet-4-5")
-web_search_model = os.getenv("WEB_SEARCH_MODEL", "openrouter/anthropic/claude-sonnet-4-5")
-max_depth = os.getenv("MAX_DEPTH", 5)
-use_verifier = os.getenv("USE_VERIFIER", "True")
-COLLECTION_NAME = os.getenv("COLLECTION_NAME", "memories")
-MEMORY_MODEL = os.getenv("MEMORY_MODEL", "openrouter/anthropic/claude-sonnet-4-5")
+model = str(os.getenv("MODEL"))
+web_search_model = str(os.getenv("WEB_SEARCH_MODEL"))
+max_depth = int(os.getenv("MAX_DEPTH"))
+use_verifier = bool(os.getenv("USE_VERIFIER"))
+COLLECTION_NAME = os.getenv("COLLECTION_NAME")
+MEMORY_MODEL = str(os.getenv("MEMORY_MODEL"))
 
 # goal = """Analyze this image in detail.         
 # Provide:
