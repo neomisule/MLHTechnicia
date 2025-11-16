@@ -80,6 +80,7 @@ class MultimodalPlanner(BaseModule):
         self,
         goal: str,
         images: Optional[List[str]] = None,
+        memories: Optional[str] = None,
         context: Optional[str] = None,
         *,
         tools: Optional[Union[Sequence[Any], Mapping[str, Any]]] = None,
@@ -88,7 +89,7 @@ class MultimodalPlanner(BaseModule):
         call_params: Optional[Dict[str, Any]] = None,
         **call_kwargs: Any,
     ):
-        """Plan task with optional image context (synchronous)."""
+        """Plan task with optional image context and memories (synchronous)."""
         runtime_tools = self._merge_tools(self._tools, tools)
 
         ctx = dict(self._context_defaults)
@@ -113,6 +114,7 @@ class MultimodalPlanner(BaseModule):
             return self._predictor(
                 goal=goal,
                 images=images,
+                memories=memories,
                 context=context,
                 **filtered
             )
@@ -121,6 +123,7 @@ class MultimodalPlanner(BaseModule):
         self,
         goal: str,
         images: Optional[List[str]] = None,
+        memories: Optional[str] = None,
         context: Optional[str] = None,
         *,
         tools: Optional[Union[Sequence[Any], Mapping[str, Any]]] = None,
@@ -129,7 +132,7 @@ class MultimodalPlanner(BaseModule):
         call_params: Optional[Dict[str, Any]] = None,
         **call_kwargs: Any,
     ):
-        """Plan task with images asynchronously."""
+        """Plan task with images and memories asynchronously."""
         execution_tools = await self._get_execution_tools()
         runtime_tools = self._merge_tools(execution_tools, tools)
         self._update_predictor_tools(runtime_tools)
@@ -156,7 +159,7 @@ class MultimodalPlanner(BaseModule):
 
         with dspy.context(**ctx):
             acall = getattr(self._predictor, "acall", None)
-            payload = dict(goal=goal, images=images, context=context)
+            payload = dict(goal=goal, images=images, memories=memories, context=context)
             if acall is not None:
                 return await acall(**payload, **filtered)
             return self._predictor(**payload, **filtered)

@@ -92,6 +92,7 @@ class MultimodalExecutor(BaseModule):
         self,
         goal: str,
         images: Optional[List[str]] = None,
+        memories: Optional[str] = None,
         context: Optional[str] = None,
         *,
         tools: Optional[Union[Sequence[Any], Mapping[str, Any]]] = None,
@@ -101,11 +102,12 @@ class MultimodalExecutor(BaseModule):
         **call_kwargs: Any,
     ):
         """
-        Execute task with optional image inputs (synchronous).
+        Execute task with optional image inputs and memories (synchronous).
         
         Args:
             goal: Task description
             images: List of image paths or base64 encoded images
+            memories: Relevant memories from previous interactions
             context: ROMA execution context (XML)
             tools: Optional tools for this execution
             config: Per-call LM config overrides
@@ -140,6 +142,7 @@ class MultimodalExecutor(BaseModule):
             return self._predictor(
                 goal=goal,
                 images=images,
+                memories=memories,
                 context=context,
                 **filtered
             )
@@ -148,6 +151,7 @@ class MultimodalExecutor(BaseModule):
         self,
         goal: str,
         images: Optional[List[str]] = None,
+        memories: Optional[str] = None,
         context: Optional[str] = None,
         *,
         tools: Optional[Union[Sequence[Any], Mapping[str, Any]]] = None,
@@ -157,11 +161,12 @@ class MultimodalExecutor(BaseModule):
         **call_kwargs: Any,
     ):
         """
-        Execute task with images asynchronously.
+        Execute task with images and memories asynchronously.
         
         Args:
             goal: Task description
             images: List of image paths or base64 encoded images
+            memories: Relevant memories from previous interactions
             context: ROMA execution context (XML)
             tools: Optional tools for this execution
             config: Per-call LM config overrides
@@ -199,7 +204,7 @@ class MultimodalExecutor(BaseModule):
 
         with dspy.context(**ctx):
             acall = getattr(self._predictor, "acall", None)
-            payload = dict(goal=goal, images=images, context=context)
+            payload = dict(goal=goal, images=images, memories=memories, context=context)
             if acall is not None:
                 return await acall(**payload, **filtered)
             return self._predictor(**payload, **filtered)

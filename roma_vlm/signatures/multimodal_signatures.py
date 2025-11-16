@@ -30,6 +30,10 @@ class MultimodalAtomizerSignature(dspy.Signature):
         default=None,
         description="List of images (as dspy.Image objects or data URIs) for vision analysis"
     )
+    memories: Optional[str] = dspy.InputField(
+        default=None,
+        description="Relevant memories from previous interactions for context"
+    )
     context: Optional[str] = dspy.InputField(
         default=None, 
         description="Execution context (XML format from ROMA)"
@@ -57,6 +61,10 @@ class MultimodalPlannerSignature(dspy.Signature):
     images: Optional[List[Union[str, DspyImage]]] = dspy.InputField(
         default=None,
         description="Images (as dspy.Image objects or data URIs) for planning context"
+    )
+    memories: Optional[str] = dspy.InputField(
+        default=None,
+        description="Relevant memories from previous interactions for context"
     )
     context: Optional[str] = dspy.InputField(
         default=None,
@@ -87,6 +95,10 @@ class MultimodalExecutorSignature(dspy.Signature):
         default=None,
         description="Images (as dspy.Image objects or data URIs) for task execution"
     )
+    memories: Optional[str] = dspy.InputField(
+        default=None,
+        description="Relevant memories from previous interactions for context"
+    )
     context: Optional[str] = dspy.InputField(
         default=None,
         description="Execution context (XML format from ROMA)"
@@ -116,6 +128,10 @@ class MultimodalAggregatorSignature(dspy.Signature):
         default=None,
         description="Original images (as dspy.Image objects or data URIs) for synthesis context"
     )
+    memories: Optional[str] = dspy.InputField(
+        default=None,
+        description="Relevant memories from previous interactions for context"
+    )
     subtasks_results: List[SubTask] = dspy.InputField(
         description="List of subtask results to synthesize into final answer"
     )
@@ -143,6 +159,10 @@ class MultimodalVerifierSignature(dspy.Signature):
     images: Optional[List[str]] = dspy.InputField(
         default=None,
         description="Original images for verification context. VLM can check if output matches image content."
+    )
+    memories: Optional[str] = dspy.InputField(
+        default=None,
+        description="Relevant memories from previous interactions for context"
     )
     candidate_output: str = dspy.InputField(
         description="Output to verify against goal and images"

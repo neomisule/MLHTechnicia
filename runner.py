@@ -14,6 +14,9 @@ from roma_dspy.tools import (
     DefiLlamaToolkit,
 )
 
+from memory.vectordb import init_qdrant, get_all_categories, search_memories, stringify_retrieved_point
+from memory.generate_embeddings import generate_embeddings
+from memory.update_memory import update_memories
 
 
 
@@ -24,7 +27,8 @@ model = os.getenv("MODEL", "anthropic/claude-sonnet-4-5")
 web_search_model = os.getenv("WEB_SEARCH_MODEL", "openrouter/anthropic/claude-sonnet-4-5")
 max_depth = os.getenv("MAX_DEPTH", 5)
 use_verifier = os.getenv("USE_VERIFIER", "True")
-
+COLLECTION_NAME = os.getenv("COLLECTION_NAME", "memories")
+MEMORY_MODEL = os.getenv("MEMORY_MODEL", "openrouter/anthropic/claude-sonnet-4-5")
 
 # goal = """Analyze this image in detail.         
 # Provide:
@@ -228,9 +232,29 @@ async def test_image_analysis():
         **web_search.get_enabled_tools(),
     }
     
+    # Initialize the memory database
+    await init_qdrant()
+
+    # Get related memories from memory database using input query and categories
+    goal_embedding = (await generate_embeddings([goal]))[0]
+    retrieved_memories = await search_memories(
+        search_vector=goal_embedding,
+        collection_name=COLLECTION_NAME,
+        categories=None,  # Search across all categories
+        score_threshold=0.3,  # Minimum similarity score
+        limit=5  # Return top 5 most relevant memories
+    )
+    
+    # Format memories for injection into the prompt
+    memories_text = None
+    if retrieved_memories:
+        memories_list = [stringify_retrieved_point(m) for m in retrieved_memories]
+        memories_text = "\n\n## Relevant Memories from Previous Interactions:\n" + "\n- ".join(memories_list)
+    
     result = await multimodal_solve(
         goal=goal,
-        images=image_path,        
+        images=image_path,
+        memories=memories_text,        
         atomizer_model=model, 
         planner_model=model,   
         executor_model=model,  
@@ -257,11 +281,14 @@ async def test_image_analysis():
         atomizer_demos=ATOMIZER_DEMOS,
     )
     
-    print("=" * 60)
-    print("RESULT:")
-    print("=" * 60)
-    print(result)
-    print("=" * 60)
+    
+    # Update memories based on the interaction
+    await update_memories(existing_memories=retrieved_memories, messages=[
+        {"role": "user", "content": goal},
+        {"role": "assistant", "content": result}], model = MEMORY_MODEL)
+        
+    return result
 
 if __name__ == "__main__":
-    asyncio.run(test_image_analysis())
+    result = asyncio.run(test_image_analysis())
+    print(result)

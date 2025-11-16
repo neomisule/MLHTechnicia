@@ -80,6 +80,7 @@ class MultimodalAggregator(BaseModule):
         original_goal: str,
         subtasks_results: Sequence[SubTask],
         original_images: Optional[List[str]] = None,
+        memories: Optional[str] = None,
         *,
         tools: Optional[Union[Sequence[Any], Mapping[str, Any]]] = None,
         config: Optional[Dict[str, Any]] = None,
@@ -89,12 +90,13 @@ class MultimodalAggregator(BaseModule):
         **call_kwargs: Any,
     ):
         """
-        Aggregate subtask results with image context (synchronous).
+        Aggregate subtask results with image context and memories (synchronous).
         
         Args:
             original_goal: Original task goal
             subtasks_results: List of subtask results
             original_images: Original images for synthesis context
+            memories: Relevant memories from previous interactions
             tools: Optional tools
             config: Per-call config
             call_context: DSPy context dict
@@ -118,6 +120,8 @@ class MultimodalAggregator(BaseModule):
             extra["tools"] = runtime_tools
         if context is not None:
             extra["context"] = context
+        if memories is not None:
+            extra["memories"] = memories
 
         target_method = getattr(self._predictor, "forward", None)
         filtered = self._filter_kwargs(target_method, extra)
@@ -135,6 +139,7 @@ class MultimodalAggregator(BaseModule):
         original_goal: str,
         subtasks_results: Sequence[SubTask],
         original_images: Optional[List[str]] = None,
+        memories: Optional[str] = None,
         *,
         tools: Optional[Union[Sequence[Any], Mapping[str, Any]]] = None,
         config: Optional[Dict[str, Any]] = None,
@@ -143,7 +148,7 @@ class MultimodalAggregator(BaseModule):
         call_params: Optional[Dict[str, Any]] = None,
         **call_kwargs: Any,
     ):
-        """Aggregate subtask results with images asynchronously."""
+        """Aggregate subtask results with images and memories asynchronously."""
         execution_tools = await self._get_execution_tools()
         runtime_tools = self._merge_tools(execution_tools, tools)
         self._update_predictor_tools(runtime_tools)
@@ -162,6 +167,8 @@ class MultimodalAggregator(BaseModule):
             extra["tools"] = runtime_tools
         if context is not None:
             extra["context"] = context
+        if memories is not None:
+            extra["memories"] = memories
 
         method_for_filter = getattr(self._predictor, "aforward", None) or getattr(
             self._predictor, "forward", None

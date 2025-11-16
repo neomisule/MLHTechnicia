@@ -101,12 +101,12 @@ def _convert_images_to_data_uris(images: Optional[List[str]], max_dimension: int
     return converted
 
 
-def _wrap_forward_with_images(module, images: Optional[List[str]], param_name: str = 'images'):
+def _wrap_forward_with_images(module, images: Optional[List[str]], memories: Optional[str] = None, param_name: str = 'images'):
     """
-    Wrap a module's forward and aforward methods to automatically inject images.
+    Wrap a module's forward and aforward methods to automatically inject images and memories.
     
     This allows ROMA's RecursiveSolver to work with multimodal modules without
-    modification - the wrapper injects images into all calls transparently.
+    modification - the wrapper injects images and memories into all calls transparently.
     
     Also handles parameter name mapping: ROMA uses 'input_task' and 'context_payload',
     but multimodal modules use 'goal' and 'context'.
@@ -114,6 +114,7 @@ def _wrap_forward_with_images(module, images: Optional[List[str]], param_name: s
     Args:
         module: The module to wrap
         images: The images to inject
+        memories: The memories to inject
         param_name: The parameter name to use (e.g., 'images' or 'original_images')
     """
     # Store original methods
@@ -132,6 +133,11 @@ def _wrap_forward_with_images(module, images: Optional[List[str]], param_name: s
         # Inject images if not already provided
         if param_name not in kwargs:
             kwargs[param_name] = images
+        
+        # Inject memories if not already provided
+        if 'memories' not in kwargs:
+            kwargs['memories'] = memories
+        
         return original_forward(*args, **kwargs)
     
     # Wrap aforward (async)
@@ -146,6 +152,11 @@ def _wrap_forward_with_images(module, images: Optional[List[str]], param_name: s
         # Inject images if not already provided
         if param_name not in kwargs:
             kwargs[param_name] = images
+        
+        # Inject memories if not already provided
+        if 'memories' not in kwargs:
+            kwargs['memories'] = memories
+        
         return await original_aforward(*args, **kwargs)
     
     # Replace methods with wrapped versions
@@ -156,6 +167,7 @@ def _wrap_forward_with_images(module, images: Optional[List[str]], param_name: s
 async def multimodal_solve(
     goal: str,
     images: Optional[Union[str, List[str]]] = None,
+    memories: Optional[str] = None,
     *,
     atomizer_model: str = "openrouter/openai/gpt-4o-mini",
     planner_model: str = "openrouter/openai/gpt-4o-mini",
@@ -204,6 +216,7 @@ async def multimodal_solve(
         images: Single image path/URL or list of images to process.
                 Local file paths are automatically converted to base64 data URIs.
                 Supports: file paths, http(s):// URLs, or data: URIs
+        memories: Relevant memories from previous interactions for context
         atomizer_model: VLM for atomization decisions
         planner_model: VLM for task decomposition
         executor_model: VLM for task execution
@@ -300,12 +313,12 @@ async def multimodal_solve(
     executor._images = images
     aggregator._images = images
     
-    # Wrap the forward methods to inject images automatically
+    # Wrap the forward methods to inject images and memories automatically
     # Aggregator uses 'original_images' parameter name, others use 'images'
-    _wrap_forward_with_images(atomizer, images, param_name='images')
-    _wrap_forward_with_images(planner, images, param_name='images')
-    _wrap_forward_with_images(executor, images, param_name='images')
-    _wrap_forward_with_images(aggregator, images, param_name='original_images')
+    _wrap_forward_with_images(atomizer, images, memories, param_name='images')
+    _wrap_forward_with_images(planner, images, memories, param_name='images')
+    _wrap_forward_with_images(executor, images, memories, param_name='images')
+    _wrap_forward_with_images(aggregator, images, memories, param_name='original_images')
     
     # Create a custom AgentRegistry with our multimodal modules
     registry = AgentRegistry()
@@ -362,6 +375,7 @@ async def multimodal_solve(
         verdict = await verifier.aforward(
             goal=goal,
             images=images,
+            memories=memories,
             candidate_output=result
         )
         

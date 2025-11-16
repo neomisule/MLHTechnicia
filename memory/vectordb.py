@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 import ast
 
-from mem.generate_embeddings import generate_embeddings
+from generate_embeddings import generate_embeddings
 
 client = AsyncQdrantClient(url="http://localhost:6333")
 COLLECTION_NAME = "memories"
@@ -108,31 +108,45 @@ async def insert_memories(memories: list[EmbeddedMemory]):
 
 async def search_memories(
     search_vector: list[float],
-    user_id: int,
+    collection_name: str,
     categories: Optional[list[str]] = None,
+    score_threshold: float = 0.1,
+    limit: int = 2,
 ):
-    must_conditions: list[models.Condition] = [
-        models.FieldCondition(key="user_id", match=models.MatchValue(value=user_id))
-    ]
-    if categories is not None:
-        if len(categories) > 0:
-            must_conditions.append(
-                models.FieldCondition(
-                    key="categories", match=models.MatchAny(any=categories)
-                )
+    """
+    Search for similar memories in the vector database using semantic similarity.
+    
+    Args:
+        search_vector: Embedding vector (1536-dim) to search for
+        collection_name: Name of the Qdrant collection to query
+        categories: Optional list of categories to filter by
+        score_threshold: Minimum similarity score (0-1) to return
+        limit: Maximum number of results to return
+        
+    Returns:
+        List of RetrievedMemory objects sorted by similarity score
+    """
+    must_conditions: list[models.Condition] = []
+    
+    if categories is not None and len(categories) > 0:
+        must_conditions.append(
+            models.FieldCondition(
+                key="categories", match=models.MatchAny(any=categories)
             )
+        )
+    
+    query_filter = Filter(must=must_conditions) if must_conditions else None
+    
     outs = await client.query_points(
-        collection_name=COLLECTION_NAME,
+        collection_name=collection_name,
         query=search_vector,
         with_payload=True,
-        query_filter=Filter(must=must_conditions),
-        score_threshold=0.1,
-        limit=2,
+        query_filter=query_filter,
+        score_threshold=score_threshold,
+        limit=limit,
     )
 
-    return [
-        convert_retrieved_records(point) for point in outs.points if point is not None
-    ]
+    return [convert_retrieved_records(point) for point in outs.points if point is not None]
 
 async def add_llm_response_memory(
     user_id: int,
@@ -295,36 +309,24 @@ def convert_retrieved_records(point) -> RetrievedMemory:
     )
 
 
-async def get_all_categories(user_id):
+async def get_all_categories(collection_name: str):
     """
     Uses Qdrant's facet feature to efficiently get all unique categories
     from the indexed 'categories' field.
+    
+    Args:
+        collection_name: Name of the Qdrant collection to query
+        
+    Returns:
+        List of unique category strings found in the collection
     """
-    facet_filter = Filter(
-        must=[
-            models.FieldCondition(key="user_id", match=models.MatchValue(value=user_id))
-        ]
-    )
-
     # Use the facet method to get unique values from the indexed field
     facet_result = await client.facet(
-        collection_name=COLLECTION_NAME,
+        collection_name=collection_name,
         key="categories",
-        facet_filter=facet_filter,
         limit=1000,  # Maximum number of unique categories to return
     )
-
-    # Use the facet method to get unique values from the indexed field
-    facet_result = await client.facet(
-        collection_name=COLLECTION_NAME,
-        key="categories",
-        facet_filter=facet_filter,
-        limit=1000,  # Maximum number of unique categories to return
-    )
-
-    unique_categories = [hit.value for hit in facet_result.hits]
-
-    return unique_categories
+    return [hit.value for hit in facet_result.hits]
 
 
 def stringify_retrieved_point(retrieved_memory: RetrievedMemory):

@@ -82,6 +82,7 @@ class MultimodalAtomizer(BaseModule):
         self,
         goal: str,
         images: Optional[List[str]] = None,
+        memories: Optional[str] = None,
         context: Optional[str] = None,
         *,
         tools: Optional[Union[Sequence[Any], Mapping[str, Any]]] = None,
@@ -90,7 +91,7 @@ class MultimodalAtomizer(BaseModule):
         call_params: Optional[Dict[str, Any]] = None,
         **call_kwargs: Any,
     ):
-        """Atomize task with optional image context (synchronous)."""
+        """Atomize task with optional image context and memories (synchronous)."""
         runtime_tools = self._merge_tools(self._tools, tools)
 
         ctx = dict(self._context_defaults)
@@ -115,6 +116,7 @@ class MultimodalAtomizer(BaseModule):
             return self._predictor(
                 goal=goal,
                 images=images,
+                memories=memories,
                 context=context,
                 **filtered
             )
@@ -123,6 +125,7 @@ class MultimodalAtomizer(BaseModule):
         self,
         goal: str,
         images: Optional[List[str]] = None,
+        memories: Optional[str] = None,
         context: Optional[str] = None,
         *,
         tools: Optional[Union[Sequence[Any], Mapping[str, Any]]] = None,
@@ -131,7 +134,7 @@ class MultimodalAtomizer(BaseModule):
         call_params: Optional[Dict[str, Any]] = None,
         **call_kwargs: Any,
     ):
-        """Atomize task with images asynchronously."""
+        """Atomize task with images and memories asynchronously."""
         execution_tools = await self._get_execution_tools()
         runtime_tools = self._merge_tools(execution_tools, tools)
         self._update_predictor_tools(runtime_tools)
@@ -158,7 +161,7 @@ class MultimodalAtomizer(BaseModule):
 
         with dspy.context(**ctx):
             acall = getattr(self._predictor, "acall", None)
-            payload = dict(goal=goal, images=images, context=context)
+            payload = dict(goal=goal, images=images, memories=memories, context=context)
             if acall is not None:
                 return await acall(**payload, **filtered)
             return self._predictor(**payload, **filtered)

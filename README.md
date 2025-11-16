@@ -14,6 +14,7 @@ This project extends the ROMA (Recursive Open Meta-Agents) framework with Vision
 - **Recursive Image Processing**: Images flow through the task hierarchy
 - **Zero ROMA Modifications**: Uses ROMA as a library, no core changes needed
 - **Drop-in Replacement**: Compatible with existing ROMA workflows
+- **Agentic Memory**: You can read more about it [here](https://www.youtube.com/watch?v=n4GPdsQnHqc)
 
 # 🚀 Installation
 

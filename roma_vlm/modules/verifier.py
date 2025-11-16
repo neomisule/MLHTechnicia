@@ -84,6 +84,7 @@ class MultimodalVerifier(BaseModule):
         goal: str,
         candidate_output: str,
         images: Optional[List[str]] = None,
+        memories: Optional[str] = None,
         context: Optional[str] = None,
         *,
         tools: Optional[Union[Sequence[Any], Mapping[str, Any]]] = None,
@@ -92,7 +93,7 @@ class MultimodalVerifier(BaseModule):
         call_params: Optional[Dict[str, Any]] = None,
         **call_kwargs: Any,
     ):
-        """Verify output with image context (synchronous)."""
+        """Verify output with image context and memories (synchronous)."""
         runtime_tools = self._merge_tools(self._tools, tools)
 
         ctx = dict(self._context_defaults)
@@ -117,6 +118,7 @@ class MultimodalVerifier(BaseModule):
             return self._predictor(
                 goal=goal,
                 images=images,
+                memories=memories,
                 candidate_output=candidate_output,
                 context=context,
                 **filtered
@@ -127,6 +129,7 @@ class MultimodalVerifier(BaseModule):
         goal: str,
         candidate_output: str,
         images: Optional[List[str]] = None,
+        memories: Optional[str] = None,
         context: Optional[str] = None,
         *,
         tools: Optional[Union[Sequence[Any], Mapping[str, Any]]] = None,
@@ -135,7 +138,7 @@ class MultimodalVerifier(BaseModule):
         call_params: Optional[Dict[str, Any]] = None,
         **call_kwargs: Any,
     ):
-        """Verify output with images asynchronously."""
+        """Verify output with images and memories asynchronously."""
         execution_tools = await self._get_execution_tools()
         runtime_tools = self._merge_tools(execution_tools, tools)
         self._update_predictor_tools(runtime_tools)
@@ -165,6 +168,7 @@ class MultimodalVerifier(BaseModule):
             payload = dict(
                 goal=goal,
                 images=images,
+                memories=memories,
                 candidate_output=candidate_output,
                 context=context
             )
