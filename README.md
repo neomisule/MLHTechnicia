@@ -18,9 +18,11 @@ The Techni-fam loves innovation! Whether it's a disruptive tech solution, a crea
 [MLH] Best Use of ElevenLabs:
 Deploy natural, human-sounding audio with ElevenLabs. Create realistic, dynamic, and emotionally expressive voices for any project, from interactive AI companions to narrated stories and voice-enabled apps. ElevenLabs will empower you to build rich, immersive experiences without the need for actors or complex audio production, using simply the power of AI. Integrate fully autonomous audio experiences into your hack with ElevenLabs and give your project a voice, along with giving your team the chance to win exclusive ElevenLabs branded airpods!
 
-
 [Intuit] Most Transformative Hack Leveraging Generative AI/ML:
 A submission that uses Artificial Intelligence, Machine Learning, or Generative AI to solve a complex problem by providing intelligent guidance, automating a tedious workflow, or dramatically increasing efficiency and speed for the user. The best hacks will demonstrate clear, measurable impact.
 
 [Technica] No Mortals Left Behind: Best Accessibility Solution:
 Technica embraces its mission to promote diversity and inclusion! We want to see your hacks that utilize technology to provide more inclusive, accessible, and empowering solutions.
+
+[MLH] Best Use of DigitalOcean Gradient™ AI: 
+DigitalOcean GradientTM AI is a unified AI cloud for building, training, and deploying machine learning models and AI agents. Get access to GPU infrastructure like DigitalOcean GPU Droplets and Bare Metal servers, along with serverless inference and 1-Click Models for instant deployment of your favorite LLMs! Sign up for DigitalOcean today and get $200 worth of free credits that you can use towards building your next Gradient-powered hack.
