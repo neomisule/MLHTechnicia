@@ -2,8 +2,8 @@ import os
 import dspy
 from pydantic import BaseModel
 from datetime import datetime
-from generate_embeddings import generate_embeddings
-from vectordb import (
+from .generate_embeddings import generate_embeddings
+from .vectordb import (
     EmbeddedMemory,
     RetrievedMemory,
     delete_records,

@@ -12,7 +12,7 @@ import asyncio
 import numpy as np
 import pandas as pd
 import ast
-from generate_embeddings import generate_embeddings
+from .generate_embeddings import generate_embeddings
 
 COLLECTION_NAME = str(os.getenv("COLLECTION_NAME"))
 client = AsyncQdrantClient(url=str(os.getenv("QDRANT_URL")))

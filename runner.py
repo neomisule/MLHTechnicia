@@ -85,23 +85,23 @@ async def test_image_analysis():
     }
     
     # Initialize the memory database
-    await init_qdrant()
+    # await init_qdrant()
 
     # Get related memories from memory database using input query and categories
-    goal_embedding = (await generate_embeddings([goal]))[0]
-    retrieved_memories = await search_memories(
-        search_vector=goal_embedding,
-        collection_name=COLLECTION_NAME,
-        categories=None,  # Search across all categories
-        score_threshold=MEMORY_CONFIG["score_threshold"],
-        limit=MEMORY_CONFIG["limit"]
-    )
+    # goal_embedding = (await generate_embeddings([goal]))[0]
+    # retrieved_memories = await search_memories(
+    #     search_vector=goal_embedding,
+    #     collection_name=COLLECTION_NAME,
+    #     categories=None,  # Search across all categories
+    #     score_threshold=MEMORY_CONFIG["score_threshold"],
+    #     limit=MEMORY_CONFIG["limit"]
+    # )
     
     # Format memories for injection into the prompt
     memories_text = None
-    if retrieved_memories:
-        memories_list = [stringify_retrieved_point(m) for m in retrieved_memories]
-        memories_text = "\n\n## Relevant Memories from Previous Interactions:\n" + "\n- ".join(memories_list)
+    # if retrieved_memories:
+    #     memories_list = [stringify_retrieved_point(m) for m in retrieved_memories]
+    #     memories_text = "\n\n## Relevant Memories from Previous Interactions:\n" + "\n- ".join(memories_list)
     
     result = await multimodal_solve(
         goal=goal,
@@ -135,9 +135,9 @@ async def test_image_analysis():
     
     
     # Update memories based on the interaction
-    await update_memories(existing_memories=retrieved_memories, messages=[
-        {"role": "user", "content": goal},
-        {"role": "assistant", "content": result}], model = MEMORY_MODEL)
+    # await update_memories(existing_memories=retrieved_memories, messages=[
+    #     {"role": "user", "content": goal},
+    #     {"role": "assistant", "content": result}], model = MEMORY_MODEL)
         
     return result
 
