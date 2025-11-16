@@ -61,3 +61,5 @@ results/
 outputs/
 artifacts/
 
+.cache
+vlm-roma-env/
