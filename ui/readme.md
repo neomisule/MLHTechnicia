@@ -1,0 +1,3 @@
+- high contrast theme
+- dsylexia friendly fonts 
+- voice chatbot activated on special keyword like Alexa (bonus : identify accent and answer in same accent)
