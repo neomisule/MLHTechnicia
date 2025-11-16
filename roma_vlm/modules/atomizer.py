@@ -44,6 +44,8 @@ class MultimodalAtomizer(BaseModule):
         prediction_strategy: Union[PredictionStrategy, str] = PredictionStrategy.CHAIN_OF_THOUGHT,
         *,
         signature: Any = None,
+        signature_instructions: Optional[str] = None,
+        demos: Optional[List] = None,
         config: Optional[Any] = None,
         lm: Optional[dspy.LM] = None,
         model: Optional[str] = None,
@@ -51,8 +53,18 @@ class MultimodalAtomizer(BaseModule):
         tools: Optional[Union[Sequence[Any], Mapping[str, Any]]] = None,
         **strategy_kwargs: Any,
     ) -> None:
+        # Handle signature instructions
+        final_signature = signature if signature is not None else self.DEFAULT_SIGNATURE
+        if signature_instructions:
+            # Clone the signature and inject instructions
+            final_signature = type(
+                f"{final_signature.__name__}WithInstructions",
+                (final_signature,),
+                {"__doc__": signature_instructions}
+            )
+        
         super().__init__(
-            signature=signature if signature is not None else self.DEFAULT_SIGNATURE,
+            signature=final_signature,
             config=config,
             prediction_strategy=prediction_strategy,
             lm=lm,
@@ -61,6 +73,10 @@ class MultimodalAtomizer(BaseModule):
             tools=tools,
             **strategy_kwargs,
         )
+        
+        # Add demos if provided
+        if demos and hasattr(self, '_predictor'):
+            self._predictor.demos = demos
 
     def forward(
         self,

@@ -8,6 +8,9 @@ This project extends the ROMA (Recursive Open Meta-Agents) framework with Vision
 
 - **VLM-Powered Nodes**: Every ROMA node can accept images as inputs
 - **Different VLMs per Node**: Configure different vision models for each agent
+- **Configurable Prediction Strategies**: Use Chain of Thought, ReAct, or CodeAct for each node
+- **Signature Instructions**: Customize agent behavior with domain-specific prompts (NEW!)
+- **Few-Shot Learning**: Add demos for improved vision analysis accuracy (NEW!)
 - **Recursive Image Processing**: Images flow through the task hierarchy
 - **Zero ROMA Modifications**: Uses ROMA as a library, no core changes needed
 - **Drop-in Replacement**: Compatible with existing ROMA workflows
@@ -97,14 +100,3 @@ MultimodalVerifier(goal, [img1,img2,img3], output)
          ↓
 Final Result
 ```
-
-# 🏆 Hackathon Categories
-
-[Intuit] Most Transformative Hack Leveraging Generative AI/ML:
-A submission that uses Artificial Intelligence, Machine Learning, or Generative AI to solve a complex problem by providing intelligent guidance, automating a tedious workflow, or dramatically increasing efficiency and speed for the user. The best hacks will demonstrate clear, measurable impact.
-
-[Technica] No Mortals Left Behind: Best Accessibility Solution:
-Technica embraces its mission to promote diversity and inclusion! We want to see your hacks that utilize technology to provide more inclusive, accessible, and empowering solutions.
-
-[MLH] Best Use of DigitalOcean Gradient™ AI: 
-DigitalOcean GradientTM AI is a unified AI cloud for building, training, and deploying machine learning models and AI agents. Get access to GPU infrastructure like DigitalOcean GPU Droplets and Bare Metal servers, along with serverless inference and 1-Click Models for instant deployment of your favorite LLMs! Sign up for DigitalOcean today and get $200 worth of free credits that you can use towards building your next Gradient-powered hack.

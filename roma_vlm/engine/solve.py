@@ -126,8 +126,8 @@ def _wrap_forward_with_images(module, images: Optional[List[str]], param_name: s
         # Map ROMA's parameter names to multimodal module parameter names
         if 'input_task' in kwargs and 'goal' not in kwargs:
             kwargs['goal'] = kwargs.pop('input_task')
-        if 'context_payload' in kwargs and 'context' not in kwargs:
-            kwargs['context'] = kwargs.pop('context_payload')
+        # Note: Don't map context_payload to context - they are different parameters
+        # context_payload is a string, context is a dict for dspy.context()
         
         # Inject images if not already provided
         if param_name not in kwargs:
@@ -140,8 +140,8 @@ def _wrap_forward_with_images(module, images: Optional[List[str]], param_name: s
         # Map ROMA's parameter names to multimodal module parameter names
         if 'input_task' in kwargs and 'goal' not in kwargs:
             kwargs['goal'] = kwargs.pop('input_task')
-        if 'context_payload' in kwargs and 'context' not in kwargs:
-            kwargs['context'] = kwargs.pop('context_payload')
+        # Note: Don't map context_payload to context - they are different parameters
+        # context_payload is a string, context is a dict for dspy.context()
         
         # Inject images if not already provided
         if param_name not in kwargs:
@@ -167,6 +167,25 @@ async def multimodal_solve(
     executor_config: Optional[dict] = None,
     aggregator_config: Optional[dict] = None,
     verifier_config: Optional[dict] = None,
+    atomizer_strategy: str = "chain_of_thought",
+    planner_strategy: str = "chain_of_thought",
+    executor_strategy: str = "chain_of_thought",
+    aggregator_strategy: str = "chain_of_thought",
+    verifier_strategy: str = "chain_of_thought",
+    atomizer_tools: Optional[dict] = None,
+    planner_tools: Optional[dict] = None,
+    executor_tools: Optional[dict] = None,
+    aggregator_tools: Optional[dict] = None,
+    atomizer_signature_instructions: Optional[str] = None,
+    planner_signature_instructions: Optional[str] = None,
+    executor_signature_instructions: Optional[str] = None,
+    aggregator_signature_instructions: Optional[str] = None,
+    verifier_signature_instructions: Optional[str] = None,
+    atomizer_demos: Optional[List] = None,
+    planner_demos: Optional[List] = None,
+    executor_demos: Optional[List] = None,
+    aggregator_demos: Optional[List] = None,
+    verifier_demos: Optional[List] = None,
     max_depth: int = 5,
     verify: bool = True,
     enable_mlflow: bool = True,
@@ -191,6 +210,26 @@ async def multimodal_solve(
         aggregator_model: VLM for result synthesis
         verifier_model: VLM for output verification
         *_config: Model configuration dicts (temperature, cache, etc.)
+        atomizer_strategy: Prediction strategy for atomizer (default: "chain_of_thought")
+                          Options: "chain_of_thought", "react", "code_act"
+        planner_strategy: Prediction strategy for planner (default: "chain_of_thought")
+        executor_strategy: Prediction strategy for executor (default: "chain_of_thought")
+        aggregator_strategy: Prediction strategy for aggregator (default: "chain_of_thought")
+        verifier_strategy: Prediction strategy for verifier (default: "chain_of_thought")
+        atomizer_tools: Optional dict of tools for atomizer (required for react/code_act strategies)
+        planner_tools: Optional dict of tools for planner (required for react/code_act strategies)
+        executor_tools: Optional dict of tools for executor (required for react/code_act strategies)
+        aggregator_tools: Optional dict of tools for aggregator (required for react/code_act strategies)
+        atomizer_signature_instructions: Custom instructions for atomizer behavior
+        planner_signature_instructions: Custom instructions for planner behavior
+        executor_signature_instructions: Custom instructions for executor behavior
+        aggregator_signature_instructions: Custom instructions for aggregator behavior
+        verifier_signature_instructions: Custom instructions for verifier behavior
+        atomizer_demos: List of dspy.Example objects for atomizer few-shot learning
+        planner_demos: List of dspy.Example objects for planner few-shot learning
+        executor_demos: List of dspy.Example objects for executor few-shot learning
+        aggregator_demos: List of dspy.Example objects for aggregator few-shot learning
+        verifier_demos: List of dspy.Example objects for verifier few-shot learning
         max_depth: Maximum recursion depth
         verify: Whether to verify final output
         enable_mlflow: Enable MLflow tracking and logging (default: True)
@@ -217,25 +256,41 @@ async def multimodal_solve(
         images = [DspyImage(url=img) if isinstance(img, str) else img for img in images]
         print(f"✓ Images converted to DSPy Image objects for proper vision API handling")
     
-    # Initialize all VLM-powered modules
+    # Initialize all VLM-powered modules with prediction strategies and signature instructions
     atomizer = MultimodalAtomizer(
+        prediction_strategy=atomizer_strategy,
         model=atomizer_model,
-        model_config=atomizer_config or {"temperature": 0.6, "cache": False}
+        model_config=atomizer_config or {"temperature": 0.6, "cache": False},
+        tools=atomizer_tools,
+        signature_instructions=atomizer_signature_instructions,
+        demos=atomizer_demos
     )
     
     planner = MultimodalPlanner(
+        prediction_strategy=planner_strategy,
         model=planner_model,
-        model_config=planner_config or {"temperature": 0.7, "cache": True}
+        model_config=planner_config or {"temperature": 0.7, "cache": True},
+        tools=planner_tools,
+        signature_instructions=planner_signature_instructions,
+        demos=planner_demos
     )
     
     executor = MultimodalExecutor(
+        prediction_strategy=executor_strategy,
         model=executor_model,
-        model_config=executor_config or {"temperature": 0.5, "cache": True}
+        model_config=executor_config or {"temperature": 0.5, "cache": True},
+        tools=executor_tools,
+        signature_instructions=executor_signature_instructions,
+        demos=executor_demos
     )
     
     aggregator = MultimodalAggregator(
+        prediction_strategy=aggregator_strategy,
         model=aggregator_model,
-        model_config=aggregator_config or {"temperature": 0.65, "cache": True}
+        model_config=aggregator_config or {"temperature": 0.65, "cache": True},
+        tools=aggregator_tools,
+        signature_instructions=aggregator_signature_instructions,
+        demos=aggregator_demos
     )
     
     # Store images in module state so they're available during forward calls
@@ -297,8 +352,11 @@ async def multimodal_solve(
     # Optional verification with VLM
     if verify:
         verifier = MultimodalVerifier(
+            prediction_strategy=verifier_strategy,
             model=verifier_model,
-            model_config=verifier_config or {"temperature": 0.0, "cache": False}
+            model_config=verifier_config or {"temperature": 0.0, "cache": False},
+            signature_instructions=verifier_signature_instructions,
+            demos=verifier_demos
         )
         
         verdict = await verifier.aforward(

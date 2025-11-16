@@ -41,6 +41,8 @@ class MultimodalAggregator(BaseModule):
         prediction_strategy: Union[PredictionStrategy, str] = PredictionStrategy.CHAIN_OF_THOUGHT,
         *,
         signature: Any = None,
+        signature_instructions: Optional[str] = None,
+        demos: Optional[List] = None,
         config: Optional[Any] = None,
         lm: Optional[dspy.LM] = None,
         model: Optional[str] = None,
@@ -48,8 +50,18 @@ class MultimodalAggregator(BaseModule):
         tools: Optional[Union[Sequence[Any], Mapping[str, Any]]] = None,
         **strategy_kwargs: Any,
     ) -> None:
+        # Handle signature instructions
+        final_signature = signature if signature is not None else self.DEFAULT_SIGNATURE
+        if signature_instructions:
+            # Clone the signature and inject instructions
+            final_signature = type(
+                f"{final_signature.__name__}WithInstructions",
+                (final_signature,),
+                {"__doc__": signature_instructions}
+            )
+        
         super().__init__(
-            signature=signature if signature is not None else self.DEFAULT_SIGNATURE,
+            signature=final_signature,
             config=config,
             prediction_strategy=prediction_strategy,
             lm=lm,
@@ -58,6 +70,10 @@ class MultimodalAggregator(BaseModule):
             tools=tools,
             **strategy_kwargs,
         )
+        
+        # Add demos if provided
+        if demos and hasattr(self, '_predictor'):
+            self._predictor.demos = demos
 
     def forward(
         self,
@@ -67,8 +83,8 @@ class MultimodalAggregator(BaseModule):
         *,
         tools: Optional[Union[Sequence[Any], Mapping[str, Any]]] = None,
         config: Optional[Dict[str, Any]] = None,
-        context: Optional[Dict[str, Any]] = None,
-        context_payload: Optional[str] = None,
+        call_context: Optional[Dict[str, Any]] = None,  # Dict for dspy.context()
+        context: Optional[str] = None,  # String context from ROMA
         call_params: Optional[Dict[str, Any]] = None,
         **call_kwargs: Any,
     ):
@@ -81,16 +97,16 @@ class MultimodalAggregator(BaseModule):
             original_images: Original images for synthesis context
             tools: Optional tools
             config: Per-call config
-            context: DSPy context dict
-            context_payload: ROMA XML context
+            call_context: DSPy context dict
+            context: ROMA string context
             call_params: Additional params
             **call_kwargs: Additional kwargs
         """
         runtime_tools = self._merge_tools(self._tools, tools)
 
         ctx = dict(self._context_defaults)
-        if context:
-            ctx.update(context)
+        if call_context:
+            ctx.update(call_context)
         ctx.setdefault("lm", self._lm)
 
         extra = dict(call_params or {})
@@ -100,8 +116,8 @@ class MultimodalAggregator(BaseModule):
             extra["config"] = config
         if runtime_tools:
             extra["tools"] = runtime_tools
-        if context_payload is not None:
-            extra["context"] = context_payload
+        if context is not None:
+            extra["context"] = context
 
         target_method = getattr(self._predictor, "forward", None)
         filtered = self._filter_kwargs(target_method, extra)
@@ -122,8 +138,8 @@ class MultimodalAggregator(BaseModule):
         *,
         tools: Optional[Union[Sequence[Any], Mapping[str, Any]]] = None,
         config: Optional[Dict[str, Any]] = None,
-        context: Optional[Dict[str, Any]] = None,
-        context_payload: Optional[str] = None,
+        call_context: Optional[Dict[str, Any]] = None,  # Dict for dspy.context()
+        context: Optional[str] = None,  # String context from ROMA (was context_payload)
         call_params: Optional[Dict[str, Any]] = None,
         **call_kwargs: Any,
     ):
@@ -133,8 +149,8 @@ class MultimodalAggregator(BaseModule):
         self._update_predictor_tools(runtime_tools)
 
         ctx = dict(self._context_defaults)
-        if context:
-            ctx.update(context)
+        if call_context:
+            ctx.update(call_context)
         ctx.setdefault("lm", self._lm)
 
         extra = dict(call_params or {})
@@ -144,8 +160,8 @@ class MultimodalAggregator(BaseModule):
             extra["config"] = config
         if runtime_tools:
             extra["tools"] = runtime_tools
-        if context_payload is not None:
-            extra["context"] = context_payload
+        if context is not None:
+            extra["context"] = context
 
         method_for_filter = getattr(self._predictor, "aforward", None) or getattr(
             self._predictor, "forward", None
