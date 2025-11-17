@@ -132,4 +132,5 @@ async def update_memories(messages: list[dict], existing_memories: list[Retrieve
 
     with dspy.context(lm=dspy.LM(model=model, reasoning_effort="minimal", temperature=1, max_tokens=16000)):
         out = await memory_updater.acall(messages=messages, existing_memories=memory_ids)
+    print(out)
     return out.summary

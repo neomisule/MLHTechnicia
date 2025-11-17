@@ -4,6 +4,10 @@ This project extends the ROMA (Recursive Open Meta-Agents) framework with Vision
 
 
 
+
+
+
+
 # 🎯 Features
 
 - **VLM-Powered Nodes**: Every ROMA node can accept images as inputs
@@ -15,6 +19,14 @@ This project extends the ROMA (Recursive Open Meta-Agents) framework with Vision
 - **Zero ROMA Modifications**: Uses ROMA as a library, no core changes needed
 - **Drop-in Replacement**: Compatible with existing ROMA workflows
 - **Agentic Memory**: You can read more about it [here](https://www.youtube.com/watch?v=n4GPdsQnHqc)
+
+
+
+
+
+
+
+
 
 # 🚀 Installation
 
@@ -33,6 +45,15 @@ cd ../MLHTechnicia
 pip install -e . # downloading roma-vlm into our env so that we can import it anywhere easily
 ```
 
+
+
+
+
+
+
+
+
+
 # 📦 Project Structure
 
 ```
@@ -49,64 +70,27 @@ roma-vlm-extension/
 └── pyproject.toml
 ```
 
+
+
+
+# Rest APIs
+Start the Backend API Server
+```bash
+cd /Users/sarveshkhetan/src/MLHTechnicia
+python api_server.py
+```
+This starts the FastAPI server on `http://localhost:8080`
+
+![API Server](img/api.png)
+
+
+
 # UI
 ```bash
-streamlit run ui/app.py
+cd /Users/sarveshkhetan/src/MLHTechnicia/frontend
+npm install
+npm run dev
 ```
-The application will open in your default web browser at `http://localhost:8501`
+This starts the React app on `http://localhost:3000`
 
-
-
-
-# 🔄 Data Flow
-
-## 1. Single Image Analysis (Atomic Task)
-
-```
-User Input: goal + image
-         ↓
-MultimodalAtomizer(goal, [image])
-  ├─ VLM analyzes: "Can I handle this directly?"
-  └─ Result: is_atomic = True
-         ↓
-MultimodalExecutor(goal, [image])
-  ├─ VLM analyzes image
-  └─ Result: analysis output
-         ↓
-MultimodalVerifier(goal, [image], output)
-  ├─ VLM checks: "Does output match image?"
-  └─ Result: verdict = True
-         ↓
-Final Result
-```
-
-## 2. Multi-Image Task with Planning
-
-```
-User Input: goal + images
-         ↓
-MultimodalAtomizer(goal, [img1, img2, img3])
-  ├─ VLM: "This needs decomposition"
-  └─ Result: is_atomic = False
-         ↓
-MultimodalPlanner(goal, [img1, img2, img3])
-  ├─ VLM analyzes images
-  ├─ Creates subtasks referencing specific images
-  └─ Result: [subtask1, subtask2, subtask3]
-         ↓
-    ┌────┴────┬────────┐
-    ▼         ▼        ▼
-Executor   Executor  Executor
-(img1)     (img2)    (img3)
-    │         │        │
-    └────┬────┴────────┘
-         ↓
-MultimodalAggregator(goal, [img1,img2,img3], results)
-  ├─ VLM synthesizes with image context
-  └─ Result: synthesized output
-         ↓
-MultimodalVerifier(goal, [img1,img2,img3], output)
-  └─ Result: verdict
-         ↓
-Final Result
-```
+![UI Screenshot](img/ui.png)

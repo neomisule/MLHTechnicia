@@ -1,1 +1,0 @@
-# Capital One Text Only Deep Research Financial Agent : Add Capital 1 data to vector store using their API + Access to graphing tool so that it can do plots

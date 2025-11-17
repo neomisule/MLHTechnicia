@@ -15,6 +15,7 @@ import ast
 from .generate_embeddings import generate_embeddings
 
 COLLECTION_NAME = str(os.getenv("COLLECTION_NAME"))
+print(COLLECTION_NAME)
 client = AsyncQdrantClient(url=str(os.getenv("QDRANT_URL")))
 
 
@@ -127,7 +128,7 @@ async def search_memories(
         List of RetrievedMemory objects sorted by similarity score
     """
     must_conditions: list[models.Condition] = []
-    
+    print('done1')
     if categories is not None and len(categories) > 0:
         must_conditions.append(
             models.FieldCondition(
@@ -135,8 +136,10 @@ async def search_memories(
             )
         )
     
+    print('done2')
     query_filter = Filter(must=must_conditions) if must_conditions else None
-    
+    print('done3')
+
     outs = await client.query_points(
         collection_name=collection_name,
         query=search_vector,
@@ -145,7 +148,7 @@ async def search_memories(
         score_threshold=score_threshold,
         limit=limit,
     )
-
+    print('done4')
     return [convert_retrieved_records(point) for point in outs.points if point is not None]
 
 async def add_llm_response_memory(

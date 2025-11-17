@@ -1,1 +1,0 @@
-# since we can pass multiple images to our framework we can give it a video as image frames and ask questions on that video
